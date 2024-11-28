@@ -25,7 +25,7 @@ def get_tables(ip: str, port: int, token: str):
     query_api = client.query_api()
 
     query = 'from(bucket: "solar") \
-      |> range(start: -5m) \
+      |> range(start: -24h) \
       |> last()'
 
     tables = query_api.query(query)
@@ -82,7 +82,7 @@ async def async_setup_entry(
         if field == "Energy.Production.Total.Day":
             to_add.append(EnpalSensor(field, measurement, 'mdi:solar-power-variant', 'Enpal Production Day', config['enpal_host_ip'], config['enpal_host_port'], config['enpal_token'], 'energy', 'kWh'))
 
-        #Power Sensor
+        #Power Sensor (inverter)
         if field == "Voltage.Phase.A":
             to_add.append(EnpalSensor(field, measurement, 'mdi:lightning-bolt', 'Enpal Voltage Phase A', config['enpal_host_ip'], config['enpal_host_port'], config['enpal_token'], 'voltage', 'V'))
         if field == "Current.String.1":
@@ -100,7 +100,7 @@ async def async_setup_entry(
         # Does not exist on my system (Solar Rel 3.35.1)
         if field == "Current.Phase.C":
             to_add.append(EnpalSensor(field, measurement, 'mdi:lightning-bolt', 'Enpal Ampere Phase C', config['enpal_host_ip'], config['enpal_host_port'], config['enpal_token'], 'current', 'A'))
-        if "Power.AC.Phase.C":
+        if field == "Power.AC.Phase.C":
             to_add.append(EnpalSensor(field, measurement, 'mdi:lightning-bolt', 'Enpal Power Phase C', config['enpal_host_ip'], config['enpal_host_port'], config['enpal_token'], 'power', 'W'))
 
         #Battery
@@ -165,7 +165,7 @@ class EnpalSensor(SensorEntity):
             query_api = client.query_api()
 
             query = f'from(bucket: "solar") \
-              |> range(start: -5m) \
+              |> range(start: -15m) \
               |> filter(fn: (r) => r["_measurement"] == "{self.measurement}") \
               |> filter(fn: (r) => r["_field"] == "{self.field}") \
               |> last()'
